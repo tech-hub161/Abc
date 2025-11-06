@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let customers = [];
     let currentCustomerId = null;
-    const NUM_ROWS_PER_CUSTOMER = 7; // New requirement: 7 rows for new customers
+    const NUM_ROWS_PER_CUSTOMER = 3; // Changed to 3 rows as per user clarification
 
     // Helper to generate unique IDs
     const generateUniqueId = () => `customer-${Date.now()}`;
 
     // Creates a single row HTML structure
     const createRowHtml = (customerId, rowIndex, rowData, customerName) => {
-        const companyName = rowData.company || `Item ${rowIndex + 1}`;
+        const companyName = rowData.company;
         return `
             <tr id="row-${customerId}-${rowIndex}">
                 <td><input type="text" class="editable" id="company-${customerId}-${rowIndex}" value="${companyName}"></td>
@@ -128,12 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.forEach(id => {
             const inputElement = document.getElementById(`${id}-${customerId}-${rowIndex}`);
             if (inputElement) {
-                inputElement.value = (id === 'company') ? `Item ${rowIndex + 1}` : 0;
+                inputElement.value = (id === 'company') ? rowData.company : 0; // Reset to original company name
             }
         });
 
         // Update data model
-        rowData.company = `Item ${rowIndex + 1}`;
         rowData.sold = 0;
         rowData.rate = 0;
         rowData.pwt = 0;
@@ -177,14 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
             rows: [],
             summary: { balance: 0, runningBill: 0, outstanding: 0 }
         };
+        const companyNames = ['ML', 'NB', 'BOOK'];
         for (let i = 0; i < NUM_ROWS_PER_CUSTOMER; i++) {
-            let companyName = `Item ${i + 1}`;
-            if (i === 0) companyName = 'ML';
-            if (i === 1) companyName = 'NB';
-            if (i === 2) companyName = 'BOOK';
-
             newCustomer.rows.push({
-                company: companyName,
+                company: companyNames[i],
                 sold: 0,
                 rate: 0,
                 total: 0,
