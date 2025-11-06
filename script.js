@@ -1,54 +1,97 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const customerView = document.getElementById('customer-view');
     const tableBody = document.getElementById('data-table-body');
-    const companies = ['ML', 'NB', 'BOOK'];
-    let data = [];
+    const summaryBalanceInput = document.getElementById('summary-balance');
+    const addNewCustomerBtn = document.getElementById('add-new-customer-btn');
+    const saveDataBtn = document.getElementById('save-data-btn');
+    const reportBtn = document.getElementById('report-btn');
 
-    const createRow = (company, rowData) => {
-        const row = document.createElement('tr');
-        row.id = `row-${company}`;
-        row.innerHTML = `
-            <td>NAME</td>
-            <td>${company}</td>
-            <td><input type="number" class="editable" id="sold-${company}" value="${rowData.sold}"></td>
-            <td><input type="number" class="editable" id="rate-${company}" value="${rowData.rate}"></td>
-            <td class="calculated" id="total-${company}">${rowData.total.toFixed(2)}</td>
-            <td><input type="number" class="editable" id="pwt-${company}" value="${rowData.pwt}"></td>
-            <td><input type="number" class="editable" id="vc-${company}" value="${rowData.vc}"></td>
-            <td class="calculated" id="current-bill-${company}">${rowData.currentBill.toFixed(2)}</td>
-            <td>
-                <button class="action-btn edit-btn" id="edit-${company}">Edit</button>
-                <button class="action-btn delete-btn" id="delete-${company}">Clear</button>
-            </td>
+    let customers = [];
+    let currentCustomerId = null;
+    const NUM_ROWS_PER_CUSTOMER = 7; // New requirement: 7 rows for new customers
+
+    // Helper to generate unique IDs
+    const generateUniqueId = () => `customer-${Date.now()}`;
+
+    // Creates a single row HTML structure
+    const createRowHtml = (customerId, rowIndex, rowData) => {
+        const companyName = rowData.company || `Item ${rowIndex + 1}`;
+        return `
+            <tr id="row-${customerId}-${rowIndex}">
+                <td><input type="text" class="editable" id="name-${customerId}-${rowIndex}" value="${rowData.name || ''}"></td>
+                <td><input type="text" class="editable" id="company-${customerId}-${rowIndex}" value="${companyName}"></td>
+                <td><input type="number" class="editable" id="sold-${customerId}-${rowIndex}" value="${rowData.sold}"></td>
+                <td><input type="number" class="editable" id="rate-${customerId}-${rowIndex}" value="${rowData.rate}"></td>
+                <td class="calculated" id="total-${customerId}-${rowIndex}">${rowData.total.toFixed(2)}</td>
+                <td><input type="number" class="editable" id="pwt-${customerId}-${rowIndex}" value="${rowData.pwt}"></td>
+                <td><input type="number" class="editable" id="vc-${customerId}-${rowIndex}" value="${rowData.vc}"></td>
+                <td class="calculated" id="current-bill-${customerId}-${rowIndex}">${rowData.currentBill.toFixed(2)}</td>
+                <td>
+                    <button class="action-btn edit-btn" data-customer-id="${customerId}" data-row-index="${rowIndex}">Edit</button>
+                    <button class="action-btn delete-btn" data-customer-id="${customerId}" data-row-index="${rowIndex}">Clear</button>
+                </td>
+            </tr>
         `;
-        return row;
     };
 
-    const calculateRow = (company) => {
-        const sold = parseFloat(document.getElementById(`sold-${company}`).value) || 0;
-        const rate = parseFloat(document.getElementById(`rate-${company}`).value) || 0;
-        const pwt = parseFloat(document.getElementById(`pwt-${company}`).value) || 0;
-        const vc = parseFloat(document.getElementById(`vc-${company}`).value) || 0;
+    // Renders the table for the current customer
+    const renderCustomerTable = () => {
+        const currentCustomer = customers.find(c => c.id === currentCustomerId);
+        if (!currentCustomer) return;
+
+        tableBody.innerHTML = ''; // Clear existing rows
+        currentCustomer.rows.forEach((rowData, index) => {
+            tableBody.innerHTML += createRowHtml(currentCustomerId, index, rowData);
+        });
+
+        // Update summary balance input
+        summaryBalanceInput.value = currentCustomer.summary.balance;
+
+        // Re-attach event listeners for the current customer's table
+        attachTableEventListeners();
+        calculateAll(); // Recalculate everything for the rendered table
+    };
+
+    // Calculates a single row's Total and Current Bill
+    const calculateRow = (customerId, rowIndex) => {
+        const customer = customers.find(c => c.id === customerId);
+        if (!customer) return;
+
+        const rowData = customer.rows[rowIndex];
+        if (!rowData) return;
+
+        const sold = parseFloat(document.getElementById(`sold-${customerId}-${rowIndex}`).value) || 0;
+        const rate = parseFloat(document.getElementById(`rate-${customerId}-${rowIndex}`).value) || 0;
+        const pwt = parseFloat(document.getElementById(`pwt-${customerId}-${rowIndex}`).value) || 0;
+        const vc = parseFloat(document.getElementById(`vc-${customerId}-${rowIndex}`).value) || 0;
 
         const total = sold * rate;
         const currentBill = total - (pwt + vc);
 
-        document.getElementById(`total-${company}`).textContent = total.toFixed(2);
-        document.getElementById(`current-bill-${company}`).textContent = currentBill.toFixed(2);
+        document.getElementById(`total-${customerId}-${rowIndex}`).textContent = total.toFixed(2);
+        document.getElementById(`current-bill-${customerId}-${rowIndex}`).textContent = currentBill.toFixed(2);
 
-        const dataIndex = data.findIndex(d => d.company === company);
-        if (dataIndex > -1) {
-            data[dataIndex] = { ...data[dataIndex], sold, rate, pwt, vc, total, currentBill };
-        }
+        // Update data model
+        rowData.sold = sold;
+        rowData.rate = rate;
+        rowData.pwt = pwt;
+        rowData.vc = vc;
+        rowData.total = total;
+        rowData.currentBill = currentBill;
 
-        calculateTotals();
+        calculateAll();
     };
 
-    const calculateTotals = () => {
-        const totalSold = data.reduce((sum, d) => sum + d.sold, 0);
-        const totalTotal = data.reduce((sum, d) => sum + d.total, 0);
-        const totalPwt = data.reduce((sum, d) => sum + d.pwt, 0);
-        const totalVc = data.reduce((sum, d) => sum + d.vc, 0);
-        const totalCurrentBill = data.reduce((sum, d) => sum + d.currentBill, 0);
+    // Calculates total row values and summary
+    const calculateAll = () => {
+        const currentCustomer = customers.find(c => c.id === currentCustomerId);
+        if (!currentCustomer) return;
+
+        const totalSold = currentCustomer.rows.reduce((sum, d) => sum + d.sold, 0);
+        const totalTotal = currentCustomer.rows.reduce((sum, d) => sum + d.total, 0);
+        const totalPwt = currentCustomer.rows.reduce((sum, d) => sum + d.pwt, 0);
+        const totalVc = currentCustomer.rows.reduce((sum, d) => sum + d.vc, 0);
+        const totalCurrentBill = currentCustomer.rows.reduce((sum, d) => sum + d.currentBill, 0);
 
         document.getElementById('total-sold').textContent = totalSold;
         document.getElementById('total-total').textContent = totalTotal.toFixed(2);
@@ -56,52 +99,32 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('total-vc').textContent = totalVc;
         document.getElementById('total-current-bill').textContent = totalCurrentBill.toFixed(2);
 
-        calculateSummary(totalCurrentBill);
-    };
-
-    const calculateSummary = (runningBill) => {
-        const balance = parseFloat(document.getElementById('summary-balance').value) || 0;
+        // Summary calculations
+        const runningBill = totalCurrentBill;
+        const balance = parseFloat(summaryBalanceInput.value) || 0;
         const outstanding = runningBill + balance;
 
         document.getElementById('summary-running-bill').textContent = runningBill.toFixed(2);
         document.getElementById('summary-outstanding').textContent = outstanding.toFixed(2);
-        
-        const summaryData = { balance: parseFloat(document.getElementById('summary-balance').value) || 0 };
-        saveData(summaryData);
+
+        // Update customer summary in data model
+        currentCustomer.summary.runningBill = runningBill;
+        currentCustomer.summary.balance = balance;
+        currentCustomer.summary.outstanding = outstanding;
+
+        // Auto-save on calculation (can be removed if explicit save is preferred)
+        saveAllCustomers();
     };
 
-    const saveData = (summaryData) => {
-        const fullData = {
-            rows: data,
-            summary: summaryData || { balance: parseFloat(document.getElementById('summary-balance').value) || 0 }
-        };
-        localStorage.setItem('customerData', JSON.stringify(fullData));
-    };
-
-    const loadData = () => {
-        const savedData = localStorage.getItem('customerData');
-        if (savedData) {
-            return JSON.parse(savedData);
-        }
-        // Default structure if no data is saved
-        return {
-            rows: companies.map(c => ({ company: c, sold: 0, rate: 0, total: 0, pwt: 0, vc: 0, currentBill: 0 })),
-            summary: { balance: 0 }
-        };
-    };
-    
-    const toggleEditSave = (company, isEditing) => {
-        const row = document.getElementById(`row-${company}`);
+    // Toggles edit/save state for a row
+    const toggleEditSave = (customerId, rowIndex, isEditing) => {
+        const row = document.getElementById(`row-${customerId}-${rowIndex}`);
         const inputs = row.querySelectorAll('input.editable');
-        const editBtn = document.getElementById(`edit-${company}`);
+        const editBtn = row.querySelector('button.edit-btn');
 
         inputs.forEach(input => {
             input.disabled = !isEditing;
-            if(isEditing) {
-                input.style.backgroundColor = "#fff8e1"; // yellow
-            } else {
-                input.style.backgroundColor = "#f0f0f0"; // grey
-            }
+            input.style.backgroundColor = isEditing ? "#fff8e1" : "#f0f0f0";
         });
 
         if (isEditing) {
@@ -112,50 +135,160 @@ document.addEventListener('DOMContentLoaded', () => {
             editBtn.textContent = 'Edit';
             editBtn.classList.remove('save-btn');
             editBtn.classList.add('edit-btn');
-            calculateRow(company); // Recalculate and save on save
+            calculateRow(customerId, rowIndex); // Recalculate and save on save
         }
     };
 
-    const clearRow = (company) => {
-        const inputs = ['sold', 'rate', 'pwt', 'vc'];
+    // Clears a row's editable fields
+    const clearRow = (customerId, rowIndex) => {
+        const customer = customers.find(c => c.id === customerId);
+        if (!customer) return;
+
+        const rowData = customer.rows[rowIndex];
+        if (!rowData) return;
+
+        const inputs = ['name', 'company', 'sold', 'rate', 'pwt', 'vc'];
         inputs.forEach(id => {
-            document.getElementById(`${id}-${company}`).value = 0;
+            const inputElement = document.getElementById(`${id}-${customerId}-${rowIndex}`);
+            if (inputElement) {
+                inputElement.value = (id === 'name' || id === 'company') ? '' : 0;
+            }
         });
-        calculateRow(company);
+
+        // Update data model
+        rowData.name = '';
+        rowData.company = `Item ${rowIndex + 1}`;
+        rowData.sold = 0;
+        rowData.rate = 0;
+        rowData.pwt = 0;
+        rowData.vc = 0;
+        rowData.total = 0;
+        rowData.currentBill = 0;
+
+        calculateRow(customerId, rowIndex);
     };
 
+    // Saves all customer data to local storage
+    const saveAllCustomers = () => {
+        localStorage.setItem('allCustomersData', JSON.stringify(customers));
+    };
 
-    // Initialization
-    const loadedData = loadData();
-    data = loadedData.rows;
-    document.getElementById('summary-balance').value = loadedData.summary.balance;
+    // Loads all customer data from local storage
+    const loadAllCustomers = () => {
+        const savedData = localStorage.getItem('allCustomersData');
+        if (savedData) {
+            customers = JSON.parse(savedData);
+            // Ensure all loaded rows have necessary calculated fields
+            customers.forEach(customer => {
+                customer.rows.forEach(row => {
+                    row.total = row.sold * row.rate;
+                    row.currentBill = row.total - (row.pwt + row.vc);
+                });
+            });
+        } else {
+            // Initialize with one default customer if no data
+            customers.push(createDefaultCustomer());
+        }
+        currentCustomerId = customers[0].id; // Set first customer as current
+    };
 
-    companies.forEach(company => {
-        const rowData = data.find(d => d.company === company);
-        const rowElement = createRow(company, rowData);
-        tableBody.appendChild(rowElement);
-        toggleEditSave(company, false); // Initially set to non-editable
+    // Creates a new default customer object
+    const createDefaultCustomer = () => {
+        const newCustomerId = generateUniqueId();
+        const newCustomer = {
+            id: newCustomerId,
+            name: `Customer ${customers.length + 1}`,
+            rows: [],
+            summary: { balance: 0, runningBill: 0, outstanding: 0 }
+        };
+        for (let i = 0; i < NUM_ROWS_PER_CUSTOMER; i++) {
+            newCustomer.rows.push({
+                name: '',
+                company: `Item ${i + 1}`,
+                sold: 0,
+                rate: 0,
+                total: 0,
+                pwt: 0,
+                vc: 0,
+                currentBill: 0,
+            });
+        }
+        return newCustomer;
+    };
+
+    // Event delegation for table rows (input, edit, clear)
+    const attachTableEventListeners = () => {
+        // Remove previous listeners to prevent duplicates
+        customerView.removeEventListener('input', handleTableInput);
+        customerView.removeEventListener('click', handleTableClick);
+
+        // Add new listeners
+        customerView.addEventListener('input', handleTableInput);
+        customerView.addEventListener('click', handleTableClick);
+    };
+
+    const handleTableInput = (event) => {
+        if (event.target.classList.contains('editable')) {
+            const idParts = event.target.id.split('-');
+            const customerId = idParts[1];
+            const rowIndex = parseInt(idParts[2]);
+            
+            // Update the name/company in the data model immediately
+            const customer = customers.find(c => c.id === customerId);
+            if (customer) {
+                const field = idParts[0];
+                if (field === 'name') customer.rows[rowIndex].name = event.target.value;
+                if (field === 'company') customer.rows[rowIndex].company = event.target.value;
+            }
+
+            // Only trigger full row calculation for numeric inputs
+            if (['sold', 'rate', 'pwt', 'vc'].includes(idParts[0])) {
+                calculateRow(customerId, rowIndex);
+            } else {
+                saveAllCustomers(); // Save text changes immediately
+            }
+        }
+    };
+
+    const handleTableClick = (event) => {
+        if (event.target.classList.contains('action-btn')) {
+            const customerId = event.target.dataset.customerId;
+            const rowIndex = parseInt(event.target.dataset.rowIndex);
+
+            if (event.target.classList.contains('edit-btn')) {
+                toggleEditSave(customerId, rowIndex, true);
+            } else if (event.target.classList.contains('save-btn')) {
+                toggleEditSave(customerId, rowIndex, false);
+            } else if (event.target.classList.contains('delete-btn')) {
+                clearRow(customerId, rowIndex);
+            }
+        }
+    };
+
+    // Main button event listeners
+    addNewCustomerBtn.addEventListener('click', () => {
+        const newCustomer = createDefaultCustomer();
+        customers.push(newCustomer);
+        currentCustomerId = newCustomer.id;
+        renderCustomerTable();
+        saveAllCustomers();
     });
 
-    // Add event listeners
-    companies.forEach(company => {
-        const row = document.getElementById(`row-${company}`);
-        row.addEventListener('input', () => calculateRow(company));
-        
-        const editBtn = document.getElementById(`edit-${company}`);
-        editBtn.addEventListener('click', () => {
-            const isEditing = editBtn.textContent === 'Edit';
-            toggleEditSave(company, isEditing);
-        });
-
-        const deleteBtn = document.getElementById(`delete-${company}`);
-        deleteBtn.addEventListener('click', () => clearRow(company));
+    saveDataBtn.addEventListener('click', () => {
+        saveAllCustomers();
+        alert('Data saved successfully!');
     });
 
-    document.getElementById('summary-balance').addEventListener('input', () => {
-        const totalCurrentBill = data.reduce((sum, d) => sum + d.currentBill, 0);
-        calculateSummary(totalCurrentBill);
+    reportBtn.addEventListener('click', () => {
+        alert('Report functionality is not yet implemented.');
+        // Future: Generate a report based on current customer data
     });
 
-    calculateTotals(); // Initial calculation
+    summaryBalanceInput.addEventListener('input', () => {
+        calculateAll();
+    });
+
+    // Initial load and render
+    loadAllCustomers();
+    renderCustomerTable();
 });

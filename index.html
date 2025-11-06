@@ -9,53 +9,60 @@
 <body>
     <div class="container">
         <h1>Data Entry</h1>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Company</th>
-                        <th>Sold</th>
-                        <th>Rate</th>
-                        <th>Total</th>
-                        <th>PWT</th>
-                        <th>VC</th>
-                        <th>Current Bill</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="data-table-body">
-                    <!-- Rows will be dynamically inserted here -->
-                </tbody>
-                <tfoot>
-                    <tr id="total-row">
-                        <td>Total</td>
-                        <td></td>
-                        <td id="total-sold">0</td>
-                        <td></td>
-                        <td id="total-total">0.00</td>
-                        <td id="total-pwt">0</td>
-                        <td id="total-vc">0</td>
-                        <td id="total-current-bill">0.00</td>
-                        <td></td>
-                    </tr>
-                    <tr class="summary-row running-bill">
-                        <td colspan="7">Running Bill</td>
-                        <td id="summary-running-bill">0.00</td>
-                        <td></td>
-                    </tr>
-                    <tr class="summary-row balance">
-                        <td colspan="7">Balance</td>
-                        <td><input type="number" id="summary-balance" class="editable" value="0"></td>
-                        <td></td>
-                    </tr>
-                    <tr class="summary-row outstanding">
-                        <td colspan="7">Outstanding</td>
-                        <td id="summary-outstanding">0.00</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+        <div id="customer-view">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Company</th>
+                            <th>Sold</th>
+                            <th>Rate</th>
+                            <th>Total</th>
+                            <th>PWT</th>
+                            <th>VC</th>
+                            <th>Current Bill</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <!-- Rows will be dynamically inserted here -->
+                    </tbody>
+                    <tfoot>
+                        <tr id="total-row">
+                            <td>Total</td>
+                            <td></td>
+                            <td id="total-sold">0</td>
+                            <td></td>
+                            <td id="total-total">0.00</td>
+                            <td id="total-pwt">0</td>
+                            <td id="total-vc">0</td>
+                            <td id="total-current-bill">0.00</td>
+                            <td></td>
+                        </tr>
+                        <tr class="summary-row running-bill">
+                            <td colspan="7">Running Bill</td>
+                            <td id="summary-running-bill">0.00</td>
+                            <td></td>
+                        </tr>
+                        <tr class="summary-row balance">
+                            <td colspan="7">Balance</td>
+                            <td><input type="number" id="summary-balance" class="editable" value="0"></td>
+                            <td></td>
+                        </tr>
+                        <tr class="summary-row outstanding">
+                            <td colspan="7">Outstanding</td>
+                            <td id="summary-outstanding">0.00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button id="add-new-customer-btn" class="action-btn edit-btn">Add New</button>
+            <button id="save-data-btn" class="action-btn save-btn">Save</button>
+            <button id="report-btn" class="action-btn delete-btn">Report</button>
         </div>
     </div>
     <script src="script.js"></script>
