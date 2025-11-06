@@ -37,17 +37,36 @@ th, td {
     text-align: left;
 }
 
+.customer-name-input {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.customer-name-input label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.customer-name-input input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 300px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 /* Alignment */
-th, td:nth-child(1), td:nth-child(2) {
+th, td:nth-child(1) {
     text-align: left;
 }
 
+td:nth-child(2),
 td:nth-child(3),
 td:nth-child(4),
 td:nth-child(5),
 td:nth-child(6),
-td:nth-child(7),
-td:nth-child(8) {
+td:nth-child(7) {
     text-align: right;
 }
 

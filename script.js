@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const customerNameInput = document.getElementById('customer-name');
     const customerView = document.getElementById('customer-view');
     const tableBody = document.getElementById('data-table-body');
     const summaryBalanceInput = document.getElementById('summary-balance');
@@ -14,11 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateUniqueId = () => `customer-${Date.now()}`;
 
     // Creates a single row HTML structure
-    const createRowHtml = (customerId, rowIndex, rowData) => {
+    const createRowHtml = (customerId, rowIndex, rowData, customerName) => {
         const companyName = rowData.company || `Item ${rowIndex + 1}`;
         return `
             <tr id="row-${customerId}-${rowIndex}">
-                <td><input type="text" class="editable" id="name-${customerId}-${rowIndex}" value="${rowData.name || ''}"></td>
                 <td><input type="text" class="editable" id="company-${customerId}-${rowIndex}" value="${companyName}"></td>
                 <td><input type="number" class="editable" id="sold-${customerId}-${rowIndex}" value="${rowData.sold}"></td>
                 <td><input type="number" class="editable" id="rate-${customerId}-${rowIndex}" value="${rowData.rate}"></td>
@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><input type="number" class="editable" id="vc-${customerId}-${rowIndex}" value="${rowData.vc}"></td>
                 <td class="calculated" id="current-bill-${customerId}-${rowIndex}">${rowData.currentBill.toFixed(2)}</td>
                 <td>
-                    <button class="action-btn edit-btn" data-customer-id="${customerId}" data-row-index="${rowIndex}">Edit</button>
                     <button class="action-btn delete-btn" data-customer-id="${customerId}" data-row-index="${rowIndex}">Clear</button>
                 </td>
             </tr>
@@ -39,9 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentCustomer = customers.find(c => c.id === currentCustomerId);
         if (!currentCustomer) return;
 
+        customerNameInput.value = currentCustomer.customerName; // Set customer name input
         tableBody.innerHTML = ''; // Clear existing rows
         currentCustomer.rows.forEach((rowData, index) => {
-            tableBody.innerHTML += createRowHtml(currentCustomerId, index, rowData);
+            tableBody.innerHTML += createRowHtml(currentCustomerId, index, rowData, currentCustomer.customerName);
         });
 
         // Update summary balance input
@@ -116,29 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAllCustomers();
     };
 
-    // Toggles edit/save state for a row
-    const toggleEditSave = (customerId, rowIndex, isEditing) => {
-        const row = document.getElementById(`row-${customerId}-${rowIndex}`);
-        const inputs = row.querySelectorAll('input.editable');
-        const editBtn = row.querySelector('button.edit-btn');
-
-        inputs.forEach(input => {
-            input.disabled = !isEditing;
-            input.style.backgroundColor = isEditing ? "#fff8e1" : "#f0f0f0";
-        });
-
-        if (isEditing) {
-            editBtn.textContent = 'Save';
-            editBtn.classList.remove('edit-btn');
-            editBtn.classList.add('save-btn');
-        } else {
-            editBtn.textContent = 'Edit';
-            editBtn.classList.remove('save-btn');
-            editBtn.classList.add('edit-btn');
-            calculateRow(customerId, rowIndex); // Recalculate and save on save
-        }
-    };
-
     // Clears a row's editable fields
     const clearRow = (customerId, rowIndex) => {
         const customer = customers.find(c => c.id === customerId);
@@ -147,16 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const rowData = customer.rows[rowIndex];
         if (!rowData) return;
 
-        const inputs = ['name', 'company', 'sold', 'rate', 'pwt', 'vc'];
+        const inputs = ['company', 'sold', 'rate', 'pwt', 'vc'];
         inputs.forEach(id => {
             const inputElement = document.getElementById(`${id}-${customerId}-${rowIndex}`);
             if (inputElement) {
-                inputElement.value = (id === 'name' || id === 'company') ? '' : 0;
+                inputElement.value = (id === 'company') ? `Item ${rowIndex + 1}` : 0;
             }
         });
 
         // Update data model
-        rowData.name = '';
         rowData.company = `Item ${rowIndex + 1}`;
         rowData.sold = 0;
         rowData.rate = 0;
@@ -197,13 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const newCustomerId = generateUniqueId();
         const newCustomer = {
             id: newCustomerId,
-            name: `Customer ${customers.length + 1}`,
+            customerName: `Customer ${customers.length + 1}`,
             rows: [],
             summary: { balance: 0, runningBill: 0, outstanding: 0 }
         };
         for (let i = 0; i < NUM_ROWS_PER_CUSTOMER; i++) {
             newCustomer.rows.push({
-                name: '',
                 company: `Item ${i + 1}`,
                 sold: 0,
                 rate: 0,
@@ -233,11 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const customerId = idParts[1];
             const rowIndex = parseInt(idParts[2]);
             
-            // Update the name/company in the data model immediately
+            // Update the company in the data model immediately
             const customer = customers.find(c => c.id === customerId);
             if (customer) {
                 const field = idParts[0];
-                if (field === 'name') customer.rows[rowIndex].name = event.target.value;
                 if (field === 'company') customer.rows[rowIndex].company = event.target.value;
             }
 
@@ -255,11 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const customerId = event.target.dataset.customerId;
             const rowIndex = parseInt(event.target.dataset.rowIndex);
 
-            if (event.target.classList.contains('edit-btn')) {
-                toggleEditSave(customerId, rowIndex, true);
-            } else if (event.target.classList.contains('save-btn')) {
-                toggleEditSave(customerId, rowIndex, false);
-            } else if (event.target.classList.contains('delete-btn')) {
+            if (event.target.classList.contains('delete-btn')) {
                 clearRow(customerId, rowIndex);
             }
         }
@@ -286,6 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     summaryBalanceInput.addEventListener('input', () => {
         calculateAll();
+    });
+
+    customerNameInput.addEventListener('input', () => {
+        const currentCustomer = customers.find(c => c.id === currentCustomerId);
+        if (currentCustomer) {
+            currentCustomer.customerName = customerNameInput.value;
+            saveAllCustomers();
+        }
     });
 
     // Initial load and render

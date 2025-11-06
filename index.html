@@ -9,12 +9,15 @@
 <body>
     <div class="container">
         <h1>Data Entry</h1>
+        <div class="customer-name-input">
+            <label for="customer-name">Customer Name:</label>
+            <input type="text" id="customer-name" class="editable" value="">
+        </div>
         <div id="customer-view">
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
                             <th>Company</th>
                             <th>Sold</th>
                             <th>Rate</th>
@@ -31,7 +34,6 @@
                     <tfoot>
                         <tr id="total-row">
                             <td>Total</td>
-                            <td></td>
                             <td id="total-sold">0</td>
                             <td></td>
                             <td id="total-total">0.00</td>
@@ -41,17 +43,17 @@
                             <td></td>
                         </tr>
                         <tr class="summary-row running-bill">
-                            <td colspan="7">Running Bill</td>
+                            <td colspan="6">Running Bill</td>
                             <td id="summary-running-bill">0.00</td>
                             <td></td>
                         </tr>
                         <tr class="summary-row balance">
-                            <td colspan="7">Balance</td>
+                            <td colspan="6">Balance</td>
                             <td><input type="number" id="summary-balance" class="editable" value="0"></td>
                             <td></td>
                         </tr>
                         <tr class="summary-row outstanding">
-                            <td colspan="7">Outstanding</td>
+                            <td colspan="6">Outstanding</td>
                             <td id="summary-outstanding">0.00</td>
                             <td></td>
                         </tr>
