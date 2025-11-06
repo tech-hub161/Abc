@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry Table</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Data Entry</h1>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Company</th>
+                        <th>Sold</th>
+                        <th>Rate</th>
+                        <th>Total</th>
+                        <th>PWT</th>
+                        <th>VC</th>
+                        <th>Current Bill</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body">
+                    <!-- Rows will be dynamically inserted here -->
+                </tbody>
+                <tfoot>
+                    <tr id="total-row">
+                        <td>Total</td>
+                        <td></td>
+                        <td id="total-sold">0</td>
+                        <td></td>
+                        <td id="total-total">0.00</td>
+                        <td id="total-pwt">0</td>
+                        <td id="total-vc">0</td>
+                        <td id="total-current-bill">0.00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="summary-container">
+            <h2>Summary</h2>
+            <div class="summary-item running-bill">
+                <label>Running Bill</label>
+                <span id="summary-running-bill">0.00</span>
+            </div>
+            <div class="summary-item balance">
+                <label>Balance</label>
+                <input type="number" id="summary-balance" class="editable" value="0">
+            </div>
+            <div class="summary-item outstanding">
+                <label>Outstanding</label>
+                <span id="summary-outstanding">0.00</span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

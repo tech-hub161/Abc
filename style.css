@@ -1,0 +1,144 @@
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #444;
+}
+
+.table-container {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+/* Alignment */
+th, td:nth-child(1), td:nth-child(2) {
+    text-align: left;
+}
+
+td:nth-child(3),
+td:nth-child(4),
+td:nth-child(5),
+td:nth-child(6),
+td:nth-child(7),
+td:nth-child(8) {
+    text-align: right;
+}
+
+/* Color Coding */
+thead tr {
+    background-color: #000;
+    color: #fff;
+}
+
+.editable {
+    background-color: #fff8e1; /* Light Yellow/Orange */
+    border: 1px solid #ffe082;
+    border-radius: 4px;
+    padding: 8px;
+    width: 80%;
+    box-sizing: border-box;
+}
+
+.calculated {
+    background-color: #e8f5e9; /* Pale Green */
+}
+
+tfoot tr {
+    background-color: #f5f5f5; /* Pale Gray */
+    font-weight: bold;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.edit-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.summary-container {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.summary-item label {
+    color: #333;
+}
+
+.summary-item span, .summary-item input {
+    font-size: 1.1em;
+}
+
+/* Summary Colors */
+.running-bill {
+    background-color: #ffcc80; /* Orange */
+}
+
+.balance {
+    background-color: #b2ebf2; /* Light Cyan */
+}
+
+.outstanding {
+    background-color: #c8e6c9; /* Bright Green */
+}
+
+#summary-balance {
+    text-align: right;
+    width: 150px;
+}
