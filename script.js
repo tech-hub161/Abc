@@ -178,8 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
             summary: { balance: 0, runningBill: 0, outstanding: 0 }
         };
         for (let i = 0; i < NUM_ROWS_PER_CUSTOMER; i++) {
+            let companyName = `Item ${i + 1}`;
+            if (i === 0) companyName = 'ML';
+            if (i === 1) companyName = 'NB';
+            if (i === 2) companyName = 'BOOK';
+
             newCustomer.rows.push({
-                company: `Item ${i + 1}`,
+                company: companyName,
                 sold: 0,
                 rate: 0,
                 total: 0,
