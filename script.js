@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('summary-running-bill').textContent = runningBill.toFixed(2);
         document.getElementById('summary-outstanding').textContent = outstanding.toFixed(2);
         
-        const summaryData = { balance };
+        const summaryData = { balance: parseFloat(document.getElementById('summary-balance').value) || 0 };
         saveData(summaryData);
     };
 

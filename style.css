@@ -99,46 +99,37 @@ tfoot tr {
     color: white;
 }
 
-.summary-container {
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    background-color: #fff;
-}
-
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    font-size: 1.2em;
+.summary-row td {
     font-weight: bold;
-}
-
-.summary-item label {
-    color: #333;
-}
-
-.summary-item span, .summary-item input {
     font-size: 1.1em;
 }
 
-/* Summary Colors */
-.running-bill {
+.summary-row td:nth-child(1) {
+    text-align: left;
+}
+
+.summary-row td:nth-child(2) {
+    text-align: right;
+}
+
+.summary-row.running-bill {
     background-color: #ffcc80; /* Orange */
 }
 
-.balance {
+.summary-row.balance {
     background-color: #b2ebf2; /* Light Cyan */
 }
 
-.outstanding {
+.summary-row.outstanding {
     background-color: #c8e6c9; /* Bright Green */
 }
 
-#summary-balance {
+.summary-row input.editable {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
     text-align: right;
-    width: 150px;
+    background-color: #fff8e1; /* Light Yellow/Orange */
+    border: 1px solid #ffe082;
+    border-radius: 4px;
 }
